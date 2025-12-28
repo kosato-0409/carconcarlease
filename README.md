@@ -13,7 +13,8 @@ LINEミニアプリとして動作するカーリース契約者向けマイペ�
 ## 機能
 
 - ✅ LIFFによるLINEログイン
-- ✅ 契約車両情報の表示
+- ✅ 契約車両情報の登録・表示（Neon/Postgres）
+- ✅ ナンバープレート登録フォーム（バリデーション付き）
 - ✅ メンテナンス予約（プレースホルダー）
 - ✅ 事故・トラブル相談
 - ✅ プライバシーポリシー・利用規約ページ
@@ -33,11 +34,23 @@ npm install
 `.env.local` ファイルを作成し、以下の環境変数を設定してください：
 
 ```env
+# LIFF設定
 NEXT_PUBLIC_LIFF_ID=your_liff_id_here
 NEXT_PUBLIC_LIFF_URL=https://liff.line.me/your_liff_id
+
+# Neon/Postgres設定（Vercelを使用する場合、自動的に設定されます）
+POSTGRES_URL=your_postgres_url
+POSTGRES_PRISMA_URL=your_postgres_prisma_url
+POSTGRES_URL_NON_POOLING=your_postgres_url_non_pooling
 ```
 
 LIFF IDは [LINE Developers Console](https://developers.line.biz/console/) で取得できます。
+
+**データベースについて:**
+- NeonまたはPostgresデータベースの接続設定が必要です
+- Vercelにデプロイする場合、環境変数は自動的に設定されます
+- ローカル開発の場合、Neonのダッシュボードから接続情報を取得してください
+- テーブルは初回アクセス時に自動的に作成されます
 
 ### 3. 開発サーバーの起動
 
