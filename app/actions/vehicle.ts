@@ -85,3 +85,57 @@ export async function createVehicle(
   }
 }
 
+/**
+ * 全車両情報を取得（管理者用）
+ */
+export async function getAllVehicles(): Promise<Vehicle[]> {
+  try {
+    await initVehiclesTable()
+
+    const result = await sql<Vehicle>`
+      SELECT * FROM vehicles
+      ORDER BY created_at DESC
+    `
+
+    return result.rows
+  } catch (error) {
+    console.error('車両情報一覧の取得に失敗しました:', error)
+    throw error
+  }
+}
+
+/**
+ * 車両情報を更新（管理者用）
+ * 
+ * 将来的な拡張: Salesforce連携フラグなどの追加フィールドを更新する場合は、
+ * dataパラメータに以下を追加できます:
+ * - salesforce_synced?: boolean
+ * - salesforce_synced_at?: string | null
+ * - その他のカスタムフィールド
+ */
+export async function updateVehicleAdmin(
+  vehicleId: number,
+  data: {
+    inspection_expiry?: string | null
+    // 将来的に追加可能: salesforce_synced?: boolean, salesforce_synced_at?: string | null
+  }
+): Promise<Vehicle> {
+  try {
+    const result = await sql<Vehicle>`
+      UPDATE vehicles
+      SET inspection_expiry = ${data.inspection_expiry || null}
+      WHERE id = ${vehicleId}
+      RETURNING *
+    `
+
+    if (result.rows.length === 0) {
+      throw new Error('車両情報が見つかりません')
+    }
+
+    return result.rows[0]
+  } catch (error) {
+    console.error('車両情報の更新に失敗しました:', error)
+    throw error
+  }
+}
+

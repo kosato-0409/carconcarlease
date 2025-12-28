@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
+import LayoutWrapper from '@/components/LayoutWrapper'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'カーリース契約者向けマイページ',
@@ -17,11 +17,8 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-6 pb-24">
-          {children}
-        </main>
-        <Footer />
+        <LayoutWrapper>{children}</LayoutWrapper>
+        <Toaster position="top-right" />
       </body>
     </html>
   )
