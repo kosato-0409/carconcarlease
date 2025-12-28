@@ -37,7 +37,7 @@ export default function Footer() {
             })}
           </nav>
 
-          {/* プライバシーポリシーと利用規約 */}
+          {/* プライバシーポリシーおよび利用規約 */}
           <div className="flex justify-center space-x-4 text-sm text-gray-500 border-t border-gray-100 pt-4">
             <Link
               href="/privacy-policy"

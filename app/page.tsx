@@ -1,31 +1,64 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { initLiff, type LiffState } from '@/lib/liff'
+import { getVehicle } from '@/app/actions/vehicle'
 import VehicleInfo from '@/components/VehicleInfo'
 import MaintenanceReservation from '@/components/MaintenanceReservation'
 import TroubleConsultation from '@/components/TroubleConsultation'
 import Loading from './loading'
 
+type Vehicle = {
+  id: number
+  line_user_id: string
+  region: string
+  classification_no: string
+  hiragana: string
+  number: string
+  inspection_expiry: string | null
+  created_at: string
+}
+
 export default function Home() {
+  const router = useRouter()
   const [liffState, setLiffState] = useState<LiffState>({
     isLoggedIn: false,
     user: null,
     error: null,
     isLoading: true,
   })
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null)
+  const [isLoadingVehicle, setIsLoadingVehicle] = useState(true)
 
   useEffect(() => {
     const initialize = async () => {
       const state = await initLiff()
       setLiffState(state)
+
+      // ログイン成功後、ユーザーIDをセッションストレージに保存
+      if (state.isLoggedIn && state.user) {
+        sessionStorage.setItem('line_user_id', state.user.userId)
+
+        // 車両情報を取得
+        try {
+          const vehicleData = await getVehicle(state.user.userId)
+          setVehicle(vehicleData)
+        } catch (error) {
+          console.error('車両情報の取得エラー:', error)
+        } finally {
+          setIsLoadingVehicle(false)
+        }
+      } else {
+        setIsLoadingVehicle(false)
+      }
     }
 
     initialize()
   }, [])
 
   // ローディング中
-  if (liffState.isLoading) {
+  if (liffState.isLoading || isLoadingVehicle) {
     return <Loading />
   }
 
@@ -65,7 +98,7 @@ export default function Home() {
       )}
 
       {/* 契約車両情報 */}
-      <VehicleInfo />
+      <VehicleInfo vehicle={vehicle} />
 
       {/* メンテナンス予約 */}
       <MaintenanceReservation />
@@ -75,4 +108,3 @@ export default function Home() {
     </div>
   )
 }
-
