@@ -7,7 +7,7 @@ import { getVehicle } from '@/app/actions/vehicle'
 import VehicleInfo from '@/components/VehicleInfo'
 import MaintenanceReservation from '@/components/MaintenanceReservation'
 import TroubleConsultation from '@/components/TroubleConsultation'
-import Loading from './loading'
+import Loading from '../loading'
 
 type Vehicle = {
   id: number
