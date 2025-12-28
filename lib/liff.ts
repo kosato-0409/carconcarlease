@@ -17,50 +17,6 @@ export type LiffState = {
 const LIFF_ID = process.env.NEXT_PUBLIC_LIFF_ID || ''
 
 /**
- * LIFF SDKが読み込まれるまで待つ
- */
-const waitForLiffSDK = (): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') {
-      reject(new Error('SSR環境では実行できません'))
-      return
-    }
-
-    // 既に読み込まれている場合
-    if (window.liff) {
-      resolve()
-      return
-    }
-
-    // SDKスクリプトが既に読み込まれているか確認
-    const existingScript = document.querySelector('script[src*="liff"]')
-    if (existingScript) {
-      // スクリプトの読み込み完了を待つ
-      const checkInterval = setInterval(() => {
-        if (window.liff) {
-          clearInterval(checkInterval)
-          resolve()
-        }
-      }, 100)
-
-      // タイムアウト設定（10秒）
-      setTimeout(() => {
-        clearInterval(checkInterval)
-        reject(new Error('LIFF SDKの読み込みがタイムアウトしました'))
-      }, 10000)
-
-      existingScript.addEventListener('error', () => {
-        clearInterval(checkInterval)
-        reject(new Error('LIFF SDKの読み込みに失敗しました'))
-      })
-      return
-    }
-
-    reject(new Error('LIFF SDKスクリプトが見つかりません'))
-  })
-}
-
-/**
  * LIFF初期化関数
  */
 export const initLiff = async (): Promise<LiffState> => {
@@ -74,8 +30,15 @@ export const initLiff = async (): Promise<LiffState> => {
       }
     }
 
-    // LIFF SDKが読み込まれるまで待つ
-    await waitForLiffSDK()
+    // LIFF IDが設定されているか確認
+    if (!LIFF_ID) {
+      return {
+        isLoggedIn: false,
+        user: null,
+        error: 'LIFF IDが設定されていません。環境変数NEXT_PUBLIC_LIFF_IDを設定してください。',
+        isLoading: false,
+      }
+    }
 
     // LIFF初期化
     await liff.init({ liffId: LIFF_ID })
@@ -123,15 +86,10 @@ export const initLiff = async (): Promise<LiffState> => {
  */
 export const logoutLiff = async (): Promise<void> => {
   try {
-    if (typeof window === 'undefined') {
-      return
-    }
-    await waitForLiffSDK()
-    if (liff.isLoggedIn()) {
+    if (typeof window !== 'undefined' && liff.isLoggedIn()) {
       liff.logout()
     }
   } catch (error) {
     console.error('LIFFログアウトエラー:', error)
   }
 }
-
